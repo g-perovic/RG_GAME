@@ -21,11 +21,18 @@
                 position: absolute;
                 top: 20px;
                 right: 20px;
-                color: #00000000;
             }
             td{
                 height: 18px;
                 width: 18px;
+                border-color: darkolivegreen;
+                border-style: solid;
+                border-width: thick;
+            }
+            #spawnWave{
+                position: absolute;
+                top: 400px;
+                right: 20px;  
             }
         </style>
 
@@ -37,7 +44,7 @@
             c.width = window.innerWidth;
             c.height = window.innerHeight;
         </script>
-        <table align="center" id="tableID" border="1" style="cursor: pointer;">
+        <table align="center" id="tableID"  style="cursor: pointer;">
             <tr id = "9">
                 <td></td>
                 <td></td>
@@ -159,5 +166,6 @@
                 <td></td>
             </tr>
         </table>
+        <button id="spawnWave">Spawn wave</button>
     </body>
 </html>

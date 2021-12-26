@@ -10,11 +10,16 @@ export class Enemy{
         glMatrix.mat4.translate(this.translateMatrix, this.translateMatrix, this.position);
         this.speed = 1/50;
         this.moveVector = this.calculateMoveVector();
+        this.isAtEndPosition = false;
     }
 
     moveForward(){
         if (this.isAtPosition()){
-            this.movePath.shift();
+            if(this.movePath.length != 1){
+                this.movePath.shift();
+            }else{
+                this.isAtEndPosition = true;
+            }
             this.moveVector = this.calculateMoveVector();
         }
         

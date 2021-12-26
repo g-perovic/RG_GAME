@@ -2,7 +2,10 @@ import { Enemy } from "./enemy.js";
 
 const canvas = document.querySelector('canvas');
 const gl = canvas.getContext('webgl2');
+const waveSpawn = document.getElementById("spawnWave");
 let towerArray = new Array();
+let enemyArray = new Array();
+let endPosition = [5,-2,6.5]; //provizoriš
 
 for (let i = 0; i < 10; i++) {
     for (let j = 0; j < 10; j++) {
@@ -131,20 +134,25 @@ function randomColor() {
     return [Math.random(), Math.random(), Math.random(), 1];
 }
 
-function test(){
+waveSpawn.addEventListener("click", function(){
+    for (var i = 0; i < 12; i++) {
+        setTimeout(function() {
+            spawnEnemyAtSpawnPoint([0,-2,-6])
+        }, 750 * i);
+    }
+    
+});
+
+function placeTower(){
     var table = document.getElementById("tableID");
     if (table != null) {
         for (var i = 0; i < table.rows.length; i++) {
             for (var j = 0; j < table.rows[i].cells.length; j++)
             table.rows[i].cells[j].onclick = function () {
                 spawnTowerAtCoordinates([this.cellIndex,-2,9-parseInt(this.parentElement.id)]);
+                this.style.backgroundColor = "red";
             };
         }
-    }
-
-    function tableText(i,j) {
-        alert(i,j);
-        //spawnEnemyAtSpawnPoint([(coor[0]-4),-1,(10-(coor[1]))]);
     }
 }
 
@@ -153,8 +161,8 @@ function animate() {
     //glMatrix.mat4.translate(viewMatrix, viewMatrix, [0, 0.1, 2]);
     //glMatrix.mat4.invert(viewMatrix, viewMatrix);
 
-    drawEnemy(newEnemy);
-    drawEnemy(e);
+    //drawEnemy(newEnemy);
+    //drawEnemy(e);
     
     for (let i = 0; i < towerArray.length; i++) {
         for (let j = 0; j < towerArray[i].length; j++) {
@@ -164,13 +172,20 @@ function animate() {
         }      
     }
 
-    test();
+    for (let i = 0; i < enemyArray.length; i++) {
+        if(enemyArray[i] != null){
+            if(enemyArray[i].isAtEndPosition){
+                enemyArray[i] = null;
+            }else{
+                drawEnemy(enemyArray[i]);  
+            }   
+        }
+    }
+    placeTower();
 }
 
-
 function spawnEnemyAtSpawnPoint(spawnPoint) {
-    let a = new Enemy([...spawnPoint], [...vertexDataEnemy], [...uvDataEnemy], [...normalDataEnemy], 0);
-    return a;
+    enemyArray.push(new Enemy([...spawnPoint], [...vertexDataEnemy], [...uvDataEnemy], [...normalDataEnemy], 0));
 }
 
 function spawnTowerAtCoordinates(coordinates){
@@ -204,8 +219,6 @@ function drawEnemy(enemy) {
     gl.enableVertexAttribArray(normalLocation);
     gl.bindBuffer(gl.ARRAY_BUFFER, normalBuffer);
     gl.vertexAttribPointer(normalLocation, 3, gl.FLOAT, false, 0, 0);
-
-
 
     gl.uniformMatrix4fv(uniformLocations.tmatrix, false, enemy.translateMatrix);
 
@@ -443,9 +456,6 @@ gl.bindTexture(gl.TEXTURE_2D, enemy);
 
 gl.texParameterf(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
 
-
-let newEnemy = spawnEnemyAtSpawnPoint([0, -2, -6]);
-let e = spawnEnemyAtSpawnPoint([0, 0, -5]);
 
 //drawEnemy(newEnemy);
 
