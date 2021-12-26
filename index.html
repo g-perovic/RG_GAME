@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <title>Vaja</title>
+        <link rel="stylesheet" href="" type="text/css" media="screen">
+        <script src="gl-matrix-min.js"></script>
+        <script type="module" >
+            import { Enemy } from "./enemy.js";
+        </script>
+        <script type="module" src="main.js" defer></script>
+        
+    
+        <style>
+            canvas{
+                border: 1px solid black;
+                width: 100%;
+                height: 100%;
+            }
+        </style>
+
+    </head>
+    <body>
+        <canvas></canvas>
+        <script>
+            const c = document.getElementsByTagName('canvas')[0];
+            c.width = window.innerWidth;
+            c.height = window.innerHeight;
+        </script>
+    </body>
+</html>
