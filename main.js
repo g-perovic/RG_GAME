@@ -2,7 +2,13 @@ import { Enemy } from "./enemy.js";
 
 const canvas = document.querySelector('canvas');
 const gl = canvas.getContext('webgl2');
+let towerArray = new Array();
 
+for (let i = 0; i < 10; i++) {
+    for (let j = 0; j < 10; j++) {
+        towerArray[i] = new Array(10);
+    }
+}
 
 if (!gl) {
     throw new Error('WebGL not supported');
@@ -125,6 +131,23 @@ function randomColor() {
     return [Math.random(), Math.random(), Math.random(), 1];
 }
 
+function test(){
+    var table = document.getElementById("tableID");
+    if (table != null) {
+        for (var i = 0; i < table.rows.length; i++) {
+            for (var j = 0; j < table.rows[i].cells.length; j++)
+            table.rows[i].cells[j].onclick = function () {
+                spawnTowerAtCoordinates([this.cellIndex,-2,9-parseInt(this.parentElement.id)]);
+            };
+        }
+    }
+
+    function tableText(i,j) {
+        alert(i,j);
+        //spawnEnemyAtSpawnPoint([(coor[0]-4),-1,(10-(coor[1]))]);
+    }
+}
+
 function animate() {
     requestAnimationFrame(animate);
     //glMatrix.mat4.translate(viewMatrix, viewMatrix, [0, 0.1, 2]);
@@ -132,14 +155,29 @@ function animate() {
 
     drawEnemy(newEnemy);
     drawEnemy(e);
+    
+    for (let i = 0; i < towerArray.length; i++) {
+        for (let j = 0; j < towerArray[i].length; j++) {
+            if(towerArray[i][j] != null){
+                drawTower(towerArray[i][j]);
+            }                
+        }      
+    }
+
+    test();
 }
 
 
 function spawnEnemyAtSpawnPoint(spawnPoint) {
     let a = new Enemy([...spawnPoint], [...vertexDataEnemy], [...uvDataEnemy], [...normalDataEnemy], 0);
-
     return a;
 }
+
+function spawnTowerAtCoordinates(coordinates){
+    let a = new Enemy([...coordinates], [...vertexDataEnemy], [...uvDataEnemy], [...normalDataEnemy], 0); //tu bo use za towerje
+    towerArray[coordinates[2]][coordinates[0]] = a;
+}
+
 
 
 function drawEnemy(enemy) {
@@ -178,6 +216,42 @@ function drawEnemy(enemy) {
 
     enemy.moveForward();
 }
+
+function drawTower(enemy) {
+
+    gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(enemy.vertexData), gl.STATIC_DRAW);
+
+
+    gl.bindBuffer(gl.ARRAY_BUFFER, uvBuffer);
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(enemy.uvData), gl.STATIC_DRAW);
+
+    gl.bindBuffer(gl.ARRAY_BUFFER, normalBuffer);
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(enemy.normalData), gl.STATIC_DRAW);
+
+
+    gl.enableVertexAttribArray(positionLocation);
+    gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
+    gl.vertexAttribPointer(positionLocation, 3, gl.FLOAT, false, 0, 0);
+
+    gl.enableVertexAttribArray(uvLocation);
+    gl.bindBuffer(gl.ARRAY_BUFFER, uvBuffer);
+    gl.vertexAttribPointer(uvLocation, 2, gl.FLOAT, false, 0, 0);
+
+    gl.enableVertexAttribArray(normalLocation);
+    gl.bindBuffer(gl.ARRAY_BUFFER, normalBuffer);
+    gl.vertexAttribPointer(normalLocation, 3, gl.FLOAT, false, 0, 0);
+
+
+
+    gl.uniformMatrix4fv(uniformLocations.tmatrix, false, enemy.translateMatrix);
+
+
+    gl.uniform1i(uniformLocations.texId, enemy.texId);
+
+    gl.drawArrays(gl.TRIANGLES, 0, vertexDataEnemy.length / 3);
+}
+
 
 
 
