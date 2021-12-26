@@ -1,12 +1,14 @@
 export class Enemy{
-    constructor(spawnCoordinates, vertexData, colorData){
+    constructor(spawnCoordinates, vertexData, uvData, normalData, texID){
         this.position = spawnCoordinates;
         this.movePath = [[0,-2,-6],[1,-2,-4],[-5,-2,0], [5,-2,6.5]];
         this.vertexData = vertexData;
-        this.colorData = colorData;
+        this.uvData = uvData;
+        this.normalData = normalData;
+        this.texID = texID;
         this.translateMatrix = glMatrix.mat4.create();
         glMatrix.mat4.translate(this.translateMatrix, this.translateMatrix, this.position);
-        this.speed = 1/25;
+        this.speed = 1/50;
         this.moveVector = this.calculateMoveVector();
     }
 
