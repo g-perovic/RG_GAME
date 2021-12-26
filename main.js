@@ -1,4 +1,5 @@
 import { Enemy } from "./enemy.js";
+import { Tower } from "./tower.js";
 
 const canvas = document.querySelector('canvas');
 const gl = canvas.getContext('webgl2');
@@ -193,6 +194,11 @@ function spawnTowerAtCoordinates(coordinates){
     towerArray[coordinates[2]][coordinates[0]] = a;
 }
 
+function spawnTowerAtPoint(spawnPoint) {
+    let a =  new Tower([...spawnPoint], [...vertexDataBase], [...uvDataBase], [...normalDataBase], 1);
+    return a;
+}
+
 
 
 function drawEnemy(enemy) {
@@ -268,73 +274,56 @@ function drawTower(enemy) {
 
 
 
-/*function spherePointCloud(pointCount){
-    let points = [];
-    for (let index = 0; index < pointCount; index++) {
-
-        const r = () => (Math.random() * 2) - 1;
-        const point = [r(),r(),r()];
-
-        point.forEach(element => {
-            points.push(element);
-         });
-        
-    }
-
-    return points;
-}
-
-const vertexData = spherePointCloud(1000);*/
 //triangle data
 const vertexDataEnemy = [
 
-   // Front
-   0.5, 0.5, 0.5, // top right 
-   0.5, -0.5, 0.5, // bottom right
-   -0.5, 0.5, 0.5, // top left
-   -0.5, 0.5, 0.5, // top left
-   0.5, -0.5, 0.5, // bottom right
-   -0.5, -0.5, 0.5, // bottom left  
+    // Front
+    0.5, 0.5, 0.5, // top right 
+    0.5, -0.5, 0.5, // bottom right
+    -0.5, 0.5, 0.5, // top left
+    -0.5, 0.5, 0.5, // top left
+    0.5, -0.5, 0.5, // bottom right
+    -0.5, -0.5, 0.5, // bottom left  
 
-   // Left
-   -0.5, 0.5, 0.5,
-   -0.5, -0.5, 0.5,
-   -0.5, 0.5, -0.5,
-   -0.5, 0.5, -0.5,
-   -0.5, -0.5, 0.5,
-   -0.5, -0.5, -0.5,
+    // Left
+    -0.5, 0.5, 0.5,
+    -0.5, -0.5, 0.5,
+    -0.5, 0.5, -0.5,
+    -0.5, 0.5, -0.5,
+    -0.5, -0.5, 0.5,
+    -0.5, -0.5, -0.5,
 
-   // Back
-   -0.5, 0.5, -0.5,
-   -0.5, -0.5, -0.5,
-   0.5, 0.5, -0.5,
-   0.5, 0.5, -0.5,
-   -0.5, -0.5, -0.5,
-   0.5, -0.5, -0.5,
+    // Back
+    -0.5, 0.5, -0.5,
+    -0.5, -0.5, -0.5,
+    0.5, 0.5, -0.5,
+    0.5, 0.5, -0.5,
+    -0.5, -0.5, -0.5,
+    0.5, -0.5, -0.5,
 
-   // Right
-   0.5, 0.5, -0.5,
-   0.5, -0.5, -0.5,
-   0.5, 0.5, 0.5,
-   0.5, 0.5, 0.5,
-   0.5, -0.5, -0.5,
-   0.5, -0.5, 0.5,
+    // Right
+    0.5, 0.5, -0.5,
+    0.5, -0.5, -0.5,
+    0.5, 0.5, 0.5,
+    0.5, 0.5, 0.5,
+    0.5, -0.5, -0.5,
+    0.5, -0.5, 0.5,
 
-   // Top
-   0.5, 0.5, 0.5,
-   0.5, 0.5, -0.5,
-   -0.5, 0.5, 0.5,
-   -0.5, 0.5, 0.5,
-   0.5, 0.5, -0.5,
-   -0.5, 0.5, -0.5,
+    // Top
+    0.5, 0.5, 0.5,
+    0.5, 0.5, -0.5,
+    -0.5, 0.5, 0.5,
+    -0.5, 0.5, 0.5,
+    0.5, 0.5, -0.5,
+    -0.5, 0.5, -0.5,
 
-   // Underside
-   0.5, -0.5, 0.5,
-   0.5, -0.5, -0.5,
-   -0.5, -0.5, 0.5,
-   -0.5, -0.5, 0.5,
-   0.5, -0.5, -0.5,
-   -0.5, -0.5, -0.5,
+    // Underside
+    0.5, -0.5, 0.5,
+    0.5, -0.5, -0.5,
+    -0.5, -0.5, 0.5,
+    -0.5, -0.5, 0.5,
+    0.5, -0.5, -0.5,
+    -0.5, -0.5, -0.5,
 ];
 
 const uvDataEnemy = repeat(6, [
@@ -352,6 +341,116 @@ const normalDataEnemy = [
     ...repeat(6, [-1, 0, 0]),   // X-
     ...repeat(6, [0, 0, -1]),   // Z-
     ...repeat(6, [1, 0, 0]),    // X+
+    ...repeat(6, [0, 1, 0]),    // Y+
+    ...repeat(6, [0, -1, 0]),   // Y-
+]
+
+
+// F|L|B|R|T|U
+const vertexDataBase = [
+
+    // Front
+    0.5, 0.5, 0.5, // top right 
+    0.5, -0.5, 0.5, // bottom right
+    -0.5, 0.5, 0.5, // top left
+    -0.5, 0.5, 0.5, // top left
+    0.5, -0.5, 0.5, // bottom right
+    -0.5, -0.5, 0.5, // bottom left
+
+    // Front2
+    0.3, 1, 0.3, // top right 
+    0.5, 0.5, 0.5, // bottom right
+    -0.3, 1, 0.3, // top left
+    -0.3, 1, 0.3, // top left
+    0.5, 0.5, 0.5, // bottom right
+    -0.5, 0.5, 0.5, // bottom left
+
+    // Left
+    -0.5, 0.5, 0.5,
+    -0.5, -0.5, 0.5,
+    -0.5, 0.5, -0.5,
+    -0.5, 0.5, -0.5,
+    -0.5, -0.5, 0.5,
+    -0.5, -0.5, -0.5,
+
+    // Left2
+    -0.3, 1, 0.3,
+    -0.5, 0.5, 0.5,//
+    -0.3, 1, -0.3,
+    -0.3, 1, -0.3,
+    -0.5, 0.5, 0.5,//
+    -0.5, 0.5, -0.5,//
+
+    // Back
+    -0.5, 0.5, -0.5,
+    -0.5, -0.5, -0.5,
+    0.5, 0.5, -0.5,
+    0.5, 0.5, -0.5,
+    -0.5, -0.5, -0.5,
+    0.5, -0.5, -0.5,
+
+    // Back2
+    -0.3, 1, -0.3,
+    -0.5, 0.5, -0.5,//
+    0.3, 1, -0.3,
+    0.3, 1, -0.3,
+    -0.5, 0.5, -0.5,//
+    0.5, 0.5, -0.5,//
+
+    // Right
+    0.5, 0.5, -0.5,
+    0.5, -0.5, -0.5,
+    0.5, 0.5, 0.5,
+    0.5, 0.5, 0.5,
+    0.5, -0.5, -0.5,
+    0.5, -0.5, 0.5,
+
+    // Right2
+    0.3, 1, -0.3,
+    0.5, 0.5, -0.5,//
+    0.3, 1, 0.3,
+    0.3, 1, 0.3,
+    0.5, 0.5, -0.5,//
+    0.5, 0.5, 0.5,//
+
+    // Top
+    0.3, 1, 0.3,
+    0.3, 1, -0.3,
+    -0.3, 1, 0.3,
+    -0.3, 1, 0.3,
+    0.3, 1, -0.3,
+    -0.3, 1, -0.3,
+
+    // Underside
+    0.5, -0.5, 0.5,
+    0.5, -0.5, -0.5,
+    -0.5, -0.5, 0.5,
+    -0.5, -0.5, 0.5,
+    0.5, -0.5, -0.5,
+    -0.5, -0.5, -0.5,
+];
+
+
+const uvDataBase = repeat(10, [
+    1, 1, // top right
+    1, 0, // bottom right
+    0, 1, // top left
+
+    0, 1, // top left
+    1, 0, // bottom right
+    0, 0  // bottom left
+]);
+
+// F|L|B|R|T|U
+const normalDataBase = [
+    ...repeat(6, [0, 0, 1]),    // Z+
+    ...repeat(6, [0, 0.1, 0.3]),    // Z+
+    ...repeat(6, [-1, 0, 0]),   // X-
+    ...repeat(6, [-3, 0.1, 0]),   // X-
+    ...repeat(6, [0, 0, -1]),   // Z-
+    ...repeat(6, [0, 0.1, -0.3]),   // Z-
+    ...repeat(6, [1, 0, 0]),    // X+
+    ...repeat(6, [0.3, 0.1, 0]),    // X+
     ...repeat(6, [0, 1, 0]),    // Y+
     ...repeat(6, [0, -1, 0]),   // Y-
 ]
@@ -447,22 +546,26 @@ glMatrix.mat4.invert(viewMatrix, viewMatrix);
 gl.uniformMatrix4fv(uniformLocations.vmatrix, false, viewMatrix);
 gl.uniformMatrix4fv(uniformLocations.pmatrix, false, projectionMatrix);
 
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //LOAD TEXTURES
-
-const enemy = loadTexture(`textures/default_brick.png`);
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////
+const enemyTex = loadTexture(`textures/default_brick.png`);
 
 gl.activeTexture(gl.TEXTURE0);
-gl.bindTexture(gl.TEXTURE_2D, enemy);
+gl.bindTexture(gl.TEXTURE_2D, enemyTex);
+
+gl.texParameterf(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+
+const tower = loadTexture(`textures/default_obsidian.png`);
+
+gl.activeTexture(gl.TEXTURE0+1);
+gl.bindTexture(gl.TEXTURE_2D, tower);
 
 gl.texParameterf(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
 
 
 //drawEnemy(newEnemy);
 
-/* setInterval(function(){
-    animate();
-}, 1000/120);
- */
 
 animate();
 
