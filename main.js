@@ -231,7 +231,7 @@ function drawEnemy(enemy) {
 
     gl.uniform1i(uniformLocations.texId, enemy.texId);
 
-    gl.drawArrays(gl.TRIANGLES, 0, vertexDataEnemy.length / 3);
+    gl.drawArrays(gl.TRIANGLES, 0, enemy.vertexData.length / 3);
 
     enemy.moveForward();
 }
