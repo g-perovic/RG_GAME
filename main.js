@@ -1,4 +1,5 @@
 import { Enemy } from "./enemy.js";
+import { Tower } from "./tower.js";
 
 const canvas = document.querySelector('canvas');
 const gl = canvas.getContext('webgl2');
@@ -125,19 +126,52 @@ function randomColor() {
     return [Math.random(), Math.random(), Math.random(), 1];
 }
 
+
+//////////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////////
+//                      ANIMATE
+//////////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////////
+
 function animate() {
     requestAnimationFrame(animate);
     //glMatrix.mat4.translate(viewMatrix, viewMatrix, [0, 0.1, 2]);
     //glMatrix.mat4.invert(viewMatrix, viewMatrix);
 
+    test()
+    drawTower(t);
     drawEnemy(newEnemy);
     drawEnemy(e);
+}
+/* 
+PREVERJANJE HTML TABELE
+ */
+function test() {
+    var table = document.getElementById("tableID");
+    if (table != null) {
+        for (var i = 0; i < table.rows.length; i++) {
+            for (var j = 0; j < table.rows[i].cells.length; j++)
+                table.rows[i].cells[j].onclick = function () {
+                    console.log(this.cellIndex, this.parentElement.id);
+                };
+        }
+    }
+
+    function tableText(i, j) {
+        alert(i, j);
+        //spawnEnemyAtSpawnPoint([(coor[0]-4),-1,(10-(coor[1]))]);
+    }
 }
 
 
 function spawnEnemyAtSpawnPoint(spawnPoint) {
     let a = new Enemy([...spawnPoint], [...vertexDataEnemy], [...uvDataEnemy], [...normalDataEnemy], 0);
 
+    return a;
+}
+
+function spawnTowerAtPoint(spawnPoint) {
+    let a =  new Tower([...spawnPoint], [...vertexDataBase], [...uvDataBase], [...normalDataBase], 1);
     return a;
 }
 
@@ -174,80 +208,99 @@ function drawEnemy(enemy) {
 
     gl.uniform1i(uniformLocations.texId, enemy.texId);
 
-    gl.drawArrays(gl.TRIANGLES, 0, vertexDataEnemy.length / 3);
+    gl.drawArrays(gl.TRIANGLES, 0, enemy.vertexData.length / 3);
 
     enemy.moveForward();
 }
 
+function drawTower(tower) {
+
+    gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(tower.vertexData), gl.STATIC_DRAW);
 
 
-/*function spherePointCloud(pointCount){
-    let points = [];
-    for (let index = 0; index < pointCount; index++) {
+    gl.bindBuffer(gl.ARRAY_BUFFER, uvBuffer);
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(tower.uvData), gl.STATIC_DRAW);
 
-        const r = () => (Math.random() * 2) - 1;
-        const point = [r(),r(),r()];
+    gl.bindBuffer(gl.ARRAY_BUFFER, normalBuffer);
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(tower.normalData), gl.STATIC_DRAW);
 
-        point.forEach(element => {
-            points.push(element);
-         });
-        
-    }
 
-    return points;
+    gl.enableVertexAttribArray(positionLocation);
+    gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
+    gl.vertexAttribPointer(positionLocation, 3, gl.FLOAT, false, 0, 0);
+
+    gl.enableVertexAttribArray(uvLocation);
+    gl.bindBuffer(gl.ARRAY_BUFFER, uvBuffer);
+    gl.vertexAttribPointer(uvLocation, 2, gl.FLOAT, false, 0, 0);
+
+    gl.enableVertexAttribArray(normalLocation);
+    gl.bindBuffer(gl.ARRAY_BUFFER, normalBuffer);
+    gl.vertexAttribPointer(normalLocation, 3, gl.FLOAT, false, 0, 0);
+
+
+
+    gl.uniformMatrix4fv(uniformLocations.tmatrix, false, tower.translateMatrix);
+
+
+    gl.uniform1i(uniformLocations.texId, tower.texId);
+
+    gl.drawArrays(gl.TRIANGLES, 0, tower.vertexData.length / 3);
+
 }
 
-const vertexData = spherePointCloud(1000);*/
+
+
 //triangle data
 const vertexDataEnemy = [
 
-   // Front
-   0.5, 0.5, 0.5, // top right 
-   0.5, -0.5, 0.5, // bottom right
-   -0.5, 0.5, 0.5, // top left
-   -0.5, 0.5, 0.5, // top left
-   0.5, -0.5, 0.5, // bottom right
-   -0.5, -0.5, 0.5, // bottom left  
+    // Front
+    0.5, 0.5, 0.5, // top right 
+    0.5, -0.5, 0.5, // bottom right
+    -0.5, 0.5, 0.5, // top left
+    -0.5, 0.5, 0.5, // top left
+    0.5, -0.5, 0.5, // bottom right
+    -0.5, -0.5, 0.5, // bottom left  
 
-   // Left
-   -0.5, 0.5, 0.5,
-   -0.5, -0.5, 0.5,
-   -0.5, 0.5, -0.5,
-   -0.5, 0.5, -0.5,
-   -0.5, -0.5, 0.5,
-   -0.5, -0.5, -0.5,
+    // Left
+    -0.5, 0.5, 0.5,
+    -0.5, -0.5, 0.5,
+    -0.5, 0.5, -0.5,
+    -0.5, 0.5, -0.5,
+    -0.5, -0.5, 0.5,
+    -0.5, -0.5, -0.5,
 
-   // Back
-   -0.5, 0.5, -0.5,
-   -0.5, -0.5, -0.5,
-   0.5, 0.5, -0.5,
-   0.5, 0.5, -0.5,
-   -0.5, -0.5, -0.5,
-   0.5, -0.5, -0.5,
+    // Back
+    -0.5, 0.5, -0.5,
+    -0.5, -0.5, -0.5,
+    0.5, 0.5, -0.5,
+    0.5, 0.5, -0.5,
+    -0.5, -0.5, -0.5,
+    0.5, -0.5, -0.5,
 
-   // Right
-   0.5, 0.5, -0.5,
-   0.5, -0.5, -0.5,
-   0.5, 0.5, 0.5,
-   0.5, 0.5, 0.5,
-   0.5, -0.5, -0.5,
-   0.5, -0.5, 0.5,
+    // Right
+    0.5, 0.5, -0.5,
+    0.5, -0.5, -0.5,
+    0.5, 0.5, 0.5,
+    0.5, 0.5, 0.5,
+    0.5, -0.5, -0.5,
+    0.5, -0.5, 0.5,
 
-   // Top
-   0.5, 0.5, 0.5,
-   0.5, 0.5, -0.5,
-   -0.5, 0.5, 0.5,
-   -0.5, 0.5, 0.5,
-   0.5, 0.5, -0.5,
-   -0.5, 0.5, -0.5,
+    // Top
+    0.5, 0.5, 0.5,
+    0.5, 0.5, -0.5,
+    -0.5, 0.5, 0.5,
+    -0.5, 0.5, 0.5,
+    0.5, 0.5, -0.5,
+    -0.5, 0.5, -0.5,
 
-   // Underside
-   0.5, -0.5, 0.5,
-   0.5, -0.5, -0.5,
-   -0.5, -0.5, 0.5,
-   -0.5, -0.5, 0.5,
-   0.5, -0.5, -0.5,
-   -0.5, -0.5, -0.5,
+    // Underside
+    0.5, -0.5, 0.5,
+    0.5, -0.5, -0.5,
+    -0.5, -0.5, 0.5,
+    -0.5, -0.5, 0.5,
+    0.5, -0.5, -0.5,
+    -0.5, -0.5, -0.5,
 ];
 
 const uvDataEnemy = repeat(6, [
@@ -265,6 +318,116 @@ const normalDataEnemy = [
     ...repeat(6, [-1, 0, 0]),   // X-
     ...repeat(6, [0, 0, -1]),   // Z-
     ...repeat(6, [1, 0, 0]),    // X+
+    ...repeat(6, [0, 1, 0]),    // Y+
+    ...repeat(6, [0, -1, 0]),   // Y-
+]
+
+
+// F|L|B|R|T|U
+const vertexDataBase = [
+
+    // Front
+    0.5, 0.5, 0.5, // top right 
+    0.5, -0.5, 0.5, // bottom right
+    -0.5, 0.5, 0.5, // top left
+    -0.5, 0.5, 0.5, // top left
+    0.5, -0.5, 0.5, // bottom right
+    -0.5, -0.5, 0.5, // bottom left
+
+    // Front2
+    0.3, 1, 0.3, // top right 
+    0.5, 0.5, 0.5, // bottom right
+    -0.3, 1, 0.3, // top left
+    -0.3, 1, 0.3, // top left
+    0.5, 0.5, 0.5, // bottom right
+    -0.5, 0.5, 0.5, // bottom left
+
+    // Left
+    -0.5, 0.5, 0.5,
+    -0.5, -0.5, 0.5,
+    -0.5, 0.5, -0.5,
+    -0.5, 0.5, -0.5,
+    -0.5, -0.5, 0.5,
+    -0.5, -0.5, -0.5,
+
+    // Left2
+    -0.3, 1, 0.3,
+    -0.5, 0.5, 0.5,//
+    -0.3, 1, -0.3,
+    -0.3, 1, -0.3,
+    -0.5, 0.5, 0.5,//
+    -0.5, 0.5, -0.5,//
+
+    // Back
+    -0.5, 0.5, -0.5,
+    -0.5, -0.5, -0.5,
+    0.5, 0.5, -0.5,
+    0.5, 0.5, -0.5,
+    -0.5, -0.5, -0.5,
+    0.5, -0.5, -0.5,
+
+    // Back2
+    -0.3, 1, -0.3,
+    -0.5, 0.5, -0.5,//
+    0.3, 1, -0.3,
+    0.3, 1, -0.3,
+    -0.5, 0.5, -0.5,//
+    0.5, 0.5, -0.5,//
+
+    // Right
+    0.5, 0.5, -0.5,
+    0.5, -0.5, -0.5,
+    0.5, 0.5, 0.5,
+    0.5, 0.5, 0.5,
+    0.5, -0.5, -0.5,
+    0.5, -0.5, 0.5,
+
+    // Right2
+    0.3, 1, -0.3,
+    0.5, 0.5, -0.5,//
+    0.3, 1, 0.3,
+    0.3, 1, 0.3,
+    0.5, 0.5, -0.5,//
+    0.5, 0.5, 0.5,//
+
+    // Top
+    0.3, 1, 0.3,
+    0.3, 1, -0.3,
+    -0.3, 1, 0.3,
+    -0.3, 1, 0.3,
+    0.3, 1, -0.3,
+    -0.3, 1, -0.3,
+
+    // Underside
+    0.5, -0.5, 0.5,
+    0.5, -0.5, -0.5,
+    -0.5, -0.5, 0.5,
+    -0.5, -0.5, 0.5,
+    0.5, -0.5, -0.5,
+    -0.5, -0.5, -0.5,
+];
+
+
+const uvDataBase = repeat(10, [
+    1, 1, // top right
+    1, 0, // bottom right
+    0, 1, // top left
+
+    0, 1, // top left
+    1, 0, // bottom right
+    0, 0  // bottom left
+]);
+
+// F|L|B|R|T|U
+const normalDataBase = [
+    ...repeat(6, [0, 0, 1]),    // Z+
+    ...repeat(6, [0, 0.1, 0.3]),    // Z+
+    ...repeat(6, [-1, 0, 0]),   // X-
+    ...repeat(6, [-3, 0.1, 0]),   // X-
+    ...repeat(6, [0, 0, -1]),   // Z-
+    ...repeat(6, [0, 0.1, -0.3]),   // Z-
+    ...repeat(6, [1, 0, 0]),    // X+
+    ...repeat(6, [0.3, 0.1, 0]),    // X+
     ...repeat(6, [0, 1, 0]),    // Y+
     ...repeat(6, [0, -1, 0]),   // Y-
 ]
@@ -360,25 +523,29 @@ glMatrix.mat4.invert(viewMatrix, viewMatrix);
 gl.uniformMatrix4fv(uniformLocations.vmatrix, false, viewMatrix);
 gl.uniformMatrix4fv(uniformLocations.pmatrix, false, projectionMatrix);
 
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //LOAD TEXTURES
-
-const enemy = loadTexture(`textures/default_brick.png`);
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////
+const enemyTex = loadTexture(`textures/default_brick.png`);
 
 gl.activeTexture(gl.TEXTURE0);
-gl.bindTexture(gl.TEXTURE_2D, enemy);
+gl.bindTexture(gl.TEXTURE_2D, enemyTex);
+
+gl.texParameterf(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+
+const tower = loadTexture(`textures/default_obsidian.png`);
+
+gl.activeTexture(gl.TEXTURE0+1);
+gl.bindTexture(gl.TEXTURE_2D, tower);
 
 gl.texParameterf(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
 
 
 let newEnemy = spawnEnemyAtSpawnPoint([0, -2, -6]);
 let e = spawnEnemyAtSpawnPoint([0, 0, -5]);
+let t = spawnTowerAtPoint([-8, 0, 4]);
 
-//drawEnemy(newEnemy);
 
-/* setInterval(function(){
-    animate();
-}, 1000/120);
- */
 
 animate();
 
