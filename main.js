@@ -4,12 +4,14 @@ import { Tower } from "./tower.js";
 const canvas = document.querySelector('canvas');
 const gl = canvas.getContext('webgl2');
 
+
 const waveSpawn = document.getElementById("spawnWave");
 let towerArray = new Array();
 let enemyArray = new Array();
 let endPosition = [5, -2, 6.5]; //provizoriš
 
 let nTowers = 5 // št towerju ki jih lhku spawnas
+
 
 for (let i = 0; i < 10; i++) {
     for (let j = 0; j < 10; j++) {
@@ -138,6 +140,7 @@ function randomColor() {
     return [Math.random(), Math.random(), Math.random(), 1];
 }
 
+
 waveSpawn.addEventListener("click", function () {
     for (var i = 0; i < 12; i++) {
         setTimeout(function () {
@@ -155,16 +158,25 @@ function waveInProgress() {
     return false;
 }
 
-//////////////////////////////////////////////////////////////////////////////////////////////////
-//////////////////////////////////////////////////////////////////////////////////////////////////
-//                      ANIMATE
-//////////////////////////////////////////////////////////////////////////////////////////////////
-//////////////////////////////////////////////////////////////////////////////////////////////////
+
+function placeTower(){
+    var table = document.getElementById("tableID");
+    if (table != null) {
+        for (var i = 0; i < table.rows.length; i++) {
+            for (var j = 0; j < table.rows[i].cells.length; j++)
+            table.rows[i].cells[j].onclick = function () {
+                spawnTowerAtCoordinates([this.cellIndex,-2,9-parseInt(this.parentElement.id)]);
+                this.style.backgroundColor = "red";
+            };
+        }
+    }
+}
 
 function animate() {
     requestAnimationFrame(animate);
     //glMatrix.mat4.translate(viewMatrix, viewMatrix, [0, 0.1, 2]);
     //glMatrix.mat4.invert(viewMatrix, viewMatrix);
+
 
 
 
@@ -224,12 +236,14 @@ function setPnTowers(){
 
 function spawnEnemyAtSpawnPoint(spawnPoint) {
     enemyArray.push(new Enemy([...spawnPoint], [...vertexDataEnemy], [...uvDataEnemy], [...normalDataEnemy], 0));
+
 }
 
 function spawnTowerAtCoordinates(coordinates) {
     let a = new Tower([...coordinates], [...vertexDataBase], [...uvDataBase], [...normalDataBase], 1); //tu bo use za towerje
     towerArray[coordinates[2]][coordinates[0]] = a;
 }
+
 
 
 function drawEnemy(enemy) {
@@ -257,8 +271,6 @@ function drawEnemy(enemy) {
     gl.bindBuffer(gl.ARRAY_BUFFER, normalBuffer);
     gl.vertexAttribPointer(normalLocation, 3, gl.FLOAT, false, 0, 0);
 
-
-
     gl.uniformMatrix4fv(uniformLocations.tmatrix, false, enemy.translateMatrix);
 
 
@@ -269,17 +281,17 @@ function drawEnemy(enemy) {
     enemy.moveForward();
 }
 
-function drawTower(tower) {
+function drawTower(enemy) {
 
     gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
-    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(tower.vertexData), gl.STATIC_DRAW);
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(enemy.vertexData), gl.STATIC_DRAW);
 
 
     gl.bindBuffer(gl.ARRAY_BUFFER, uvBuffer);
-    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(tower.uvData), gl.STATIC_DRAW);
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(enemy.uvData), gl.STATIC_DRAW);
 
     gl.bindBuffer(gl.ARRAY_BUFFER, normalBuffer);
-    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(tower.normalData), gl.STATIC_DRAW);
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(enemy.normalData), gl.STATIC_DRAW);
 
 
     gl.enableVertexAttribArray(positionLocation);
@@ -311,12 +323,14 @@ function drawTower(tower) {
     glMatrix.mat4.mul(moveMatrix, tower.translateMatrix, rotateMatrix);
     //glMatrix.mat4.translate(moveMatrix, moveMatrix, tower.translateMatrix);
 
+
     gl.uniformMatrix4fv(uniformLocations.tmatrix, false, moveMatrix);
 
 
-    gl.uniform1i(uniformLocations.texId, tower.texId);
 
-    gl.drawArrays(gl.TRIANGLES, 0, tower.vertexData.length / 3);
+
+    gl.uniform1i(uniformLocations.texId, enemy.texId);
+
 
     gl.flush();
 
@@ -402,7 +416,9 @@ function drawLine(v1, v2, tower) {
     gl.drawArrays(gl.TRIANGLES, 0, v.length / 3);
 
     gl.flush();
+
 }
+
 
 
 
