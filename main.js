@@ -159,18 +159,7 @@ function waveInProgress() {
 }
 
 
-function placeTower(){
-    var table = document.getElementById("tableID");
-    if (table != null) {
-        for (var i = 0; i < table.rows.length; i++) {
-            for (var j = 0; j < table.rows[i].cells.length; j++)
-            table.rows[i].cells[j].onclick = function () {
-                spawnTowerAtCoordinates([this.cellIndex,-2,9-parseInt(this.parentElement.id)]);
-                this.style.backgroundColor = "red";
-            };
-        }
-    }
-}
+
 
 function animate() {
     requestAnimationFrame(animate);
@@ -281,17 +270,17 @@ function drawEnemy(enemy) {
     enemy.moveForward();
 }
 
-function drawTower(enemy) {
+function drawTower(tower) {
 
     gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
-    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(enemy.vertexData), gl.STATIC_DRAW);
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(tower.vertexData), gl.STATIC_DRAW);
 
 
     gl.bindBuffer(gl.ARRAY_BUFFER, uvBuffer);
-    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(enemy.uvData), gl.STATIC_DRAW);
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(tower.uvData), gl.STATIC_DRAW);
 
     gl.bindBuffer(gl.ARRAY_BUFFER, normalBuffer);
-    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(enemy.normalData), gl.STATIC_DRAW);
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(tower.normalData), gl.STATIC_DRAW);
 
 
     gl.enableVertexAttribArray(positionLocation);
@@ -329,8 +318,9 @@ function drawTower(enemy) {
 
 
 
-    gl.uniform1i(uniformLocations.texId, enemy.texId);
+    gl.uniform1i(uniformLocations.texId, tower.texId);
 
+    gl.drawArrays(gl.TRIANGLES, 0, tower.vertexData.length / 3);
 
     gl.flush();
 
