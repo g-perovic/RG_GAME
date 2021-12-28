@@ -1,5 +1,6 @@
 import { Enemy } from "./enemy.js";
 import { Tower } from "./tower.js";
+import { TriBackground } from "./triBackground.js";
 
 const canvas = document.querySelector('canvas');
 const gl = canvas.getContext('webgl2');
@@ -8,9 +9,12 @@ const gl = canvas.getContext('webgl2');
 const waveSpawn = document.getElementById("spawnWave");
 let towerArray = new Array();
 let enemyArray = new Array();
+let backgroundArray = new Array();
 let endPosition = [5, -2, 6.5]; //provizoriš
 
 let nTowers = 5 // št towerju ki jih lhku spawnas
+
+
 
 
 for (let i = 0; i < 10; i++) {
@@ -158,6 +162,26 @@ function waveInProgress() {
     return false;
 }
 
+function getRandomFloatBetween(min, max) {
+    return Math.random() * (max - min + 1) + min;
+}
+function getRandomNumberBetween(min, max) {
+    return Math.floor(Math.random() * (max - min + 1) + min);
+}
+
+function backgroundArrayFill() {
+    if (!document.hidden)
+        for (let i = 0; i < 80; i++) {
+            let x = getRandomFloatBetween(-100, 100);
+            let angle = getRandomNumberBetween(1, 4) * Math.PI / 2;
+            let scale = getRandomFloatBetween(1, 8);
+
+            backgroundArray.push(new TriBackground(x, angle, scale, 3));
+        }
+}
+
+
+
 
 
 
@@ -166,9 +190,8 @@ function animate() {
     //glMatrix.mat4.translate(viewMatrix, viewMatrix, [0, 0.1, 2]);
     //glMatrix.mat4.invert(viewMatrix, viewMatrix);
 
-
-
-
+    gl.clear(gl.DEPTH_BUFFER_BIT | gl.COLOR_BUFFER_BIT);
+    drawBackground();
 
 
     for (let i = 0; i < towerArray.length; i++) {
@@ -192,8 +215,12 @@ function animate() {
         }
     }
 
-    placeTower()
+    placeTower();
+
+
 }
+
+
 
 
 
@@ -202,12 +229,12 @@ PREVERJANJE HTML TABELE
  */
 function placeTower() {
     var table = document.getElementById("tableID");
-    
+
     if (table != null) {
         for (var i = 0; i < table.rows.length; i++) {
             for (var j = 0; j < table.rows[i].cells.length; j++)
                 table.rows[i].cells[j].onclick = function () {
-                    if(nTowers > 0){
+                    if (nTowers > 0) {
                         spawnTowerAtCoordinates([this.cellIndex, -2, 9 - parseInt(this.parentElement.id)]);
                         this.style.backgroundColor = "red";
                         nTowers--;
@@ -218,7 +245,7 @@ function placeTower() {
     }
 }
 
-function setPnTowers(){
+function setPnTowers() {
     var numTowers = document.getElementById("nTowers");
     numTowers.textContent = "Towers: " + nTowers;
 }
@@ -409,7 +436,63 @@ function drawLine(v1, v2, tower) {
 
 }
 
+function drawBackground() {
 
+    for (let i = 0; i < backgroundArray.length;) {
+        if (backgroundArray[i] != null) {
+            if (backgroundArray[i].isGone()) {
+                backgroundArray.splice(i, 1);
+            }
+            else {
+                drawBackgroundTriangle(backgroundArray[i]);
+                backgroundArray[i].moveDown();
+                backgroundArray[i].shrink();
+                i++;
+            }
+        }
+    }
+}
+
+function drawBackgroundTriangle(triBackground) {
+    gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(triBackground.vertexData), gl.STATIC_DRAW);
+
+
+    gl.bindBuffer(gl.ARRAY_BUFFER, uvBuffer);
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(triBackground.uvData), gl.STATIC_DRAW);
+
+    gl.bindBuffer(gl.ARRAY_BUFFER, normalBuffer);
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(triBackground.normalData), gl.STATIC_DRAW);
+
+
+    gl.enableVertexAttribArray(positionLocation);
+    gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
+    gl.vertexAttribPointer(positionLocation, 3, gl.FLOAT, false, 0, 0);
+
+    gl.enableVertexAttribArray(uvLocation);
+    gl.bindBuffer(gl.ARRAY_BUFFER, uvBuffer);
+    gl.vertexAttribPointer(uvLocation, 2, gl.FLOAT, false, 0, 0);
+
+    gl.enableVertexAttribArray(normalLocation);
+    gl.bindBuffer(gl.ARRAY_BUFFER, normalBuffer);
+    gl.vertexAttribPointer(normalLocation, 3, gl.FLOAT, false, 0, 0);
+
+
+    let moveMatrix = glMatrix.mat4.create();
+
+    glMatrix.mat4.mul(moveMatrix, triBackground.rotateMatrix, moveMatrix);
+    glMatrix.mat4.mul(moveMatrix, triBackground.scaleMatrix, moveMatrix);
+    glMatrix.mat4.mul(moveMatrix, triBackground.translateMatrix, moveMatrix,);
+
+
+    gl.uniformMatrix4fv(uniformLocations.tmatrix, false, moveMatrix);
+
+    gl.uniform1i(uniformLocations.texId, triBackground.texId);
+
+    gl.drawArrays(gl.TRIANGLES, 0, triBackground.vertexData.length / 3);
+
+
+}
 
 
 //triangle data
@@ -594,20 +677,7 @@ const normalDataBase = [
 ]
 
 
-//const colorData = 
-//    [
-//        1,0,0,1,
-//        0,1,0,1,
-//        0,0,1,1
-//    ]
-//
 
-//const colorData = 
-//    [
-//        ...randomColor(),
-//        ...randomColor(),
-//        ...randomColor()
-//    ]
 
 function newRandomColor() {
     let colorData = [];
@@ -679,8 +749,6 @@ glMatrix.mat4.perspective(projectionMatrix,
 
 glMatrix.mat4.rotateX(viewMatrix, viewMatrix, -0.4);
 glMatrix.mat4.translate(viewMatrix, viewMatrix, glMatrix.vec3.fromValues(0, 0, 15));
-
-
 glMatrix.mat4.invert(viewMatrix, viewMatrix);
 
 gl.uniformMatrix4fv(uniformLocations.vmatrix, false, viewMatrix);
@@ -710,9 +778,17 @@ gl.bindTexture(gl.TEXTURE_2D, laser);
 
 gl.texParameterf(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
 
+const black = loadTexture(`textures/black.png`);
 
+gl.activeTexture(gl.TEXTURE0 + 3);
+gl.bindTexture(gl.TEXTURE_2D, black);
 
+gl.texParameterf(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
 
+gl.clearColor(0.8, 0.8, 0.8, 1);
+
+backgroundArrayFill();
+setInterval(backgroundArrayFill, 2500);
 setPnTowers();
 animate();
 
