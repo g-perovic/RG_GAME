@@ -1,7 +1,7 @@
 export class Enemy{
-    constructor(spawnCoordinates, vertexData, uvData, normalData, texId){
+    constructor(spawnCoordinates, vertexData, uvData, normalData, texId, enemyPath){
         this.position = spawnCoordinates;
-        this.movePath = [[0,-2,-6],[1,-2,-4],[-5,-2,0], [5,-2,6.5]];
+        this.movePath = enemyPath;
         this.vertexData = vertexData;
         this.uvData = uvData;
         this.normalData = normalData;

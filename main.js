@@ -8,7 +8,11 @@ const gl = canvas.getContext('webgl2');
 const waveSpawn = document.getElementById("spawnWave");
 let towerArray = new Array();
 let enemyArray = new Array();
-let endPosition = [5, -2, 6.5]; //provizoriš
+let pathArray = new Array();
+
+let previousClick = [0,0];
+let allowTowersAndEnemies = false;
+let enemyPath = [];
 
 let nTowers = 5 // št towerju ki jih lhku spawnas
 
@@ -16,6 +20,13 @@ let nTowers = 5 // št towerju ki jih lhku spawnas
 for (let i = 0; i < 10; i++) {
     for (let j = 0; j < 10; j++) {
         towerArray[i] = new Array(10);
+    }
+}
+
+for (let i = 0; i < 10; i++) {
+    for (let j = 0; j < 10; j++) {
+        pathArray[i] = new Array(10);
+        pathArray[i].fill(0);
     }
 }
 
@@ -144,7 +155,7 @@ function randomColor() {
 waveSpawn.addEventListener("click", function () {
     for (var i = 0; i < 12; i++) {
         setTimeout(function () {
-            spawnEnemyAtSpawnPoint([0, -2, -6])
+            spawnEnemyAtSpawnPoint([-9, -2, -9])
         }, 750 * i);
     }
 
@@ -156,6 +167,101 @@ function waveInProgress() {
             return true;
     }
     return false;
+}
+
+
+function setPath(pathArray){ 
+    var table = document.getElementById("tableID");
+    pathArray[0][0] = 1;
+    colorRow(pathArray, 0);
+    colorColumn(pathArray, 0);
+    colorTable(pathArray,table);
+    
+}
+
+function drawPath(pathArray, end){
+    if(previousClick[0] == end[0]){
+        let x1 = Math.min(previousClick[1], end[1]);
+        let x2 = Math.max(previousClick[1], end[1]);
+
+        for (let i = x1; i <= x2; i++) {
+            pathArray[previousClick[0]][i] = 1;   
+        }
+    }
+    else if(previousClick[1] == end[1]){
+        let x1 = Math.min(previousClick[0], end[0]);
+        let x2 = Math.max(previousClick[0], end[0]);
+
+        for (let i = x1; i <= x2; i++) {
+            pathArray[i][previousClick[1]] = 1;   
+        }
+    }
+    previousClick = end;
+}
+
+function clearPath(pathArray){
+    for (let i = 0; i < pathArray.length; i++) {
+        for (let j = 0; j < pathArray[i].length; j++) {
+            if(pathArray[i][j] == 2){
+                pathArray[i][j] = 0;
+            } 
+        }
+    }
+}
+
+function colorRow(pathArray, x){
+    for (let i = 0; i < pathArray[x].length; i++) {
+        if(pathArray[i][x] == 0){
+            pathArray[i][x] = 2;   
+        }
+         
+    }
+}
+
+function colorColumn(pathArray, x){
+    for (let i = 0; i < pathArray.length; i++) {
+        if(pathArray[x][i] == 0){
+            pathArray[x][i] = 2;   
+        }    
+    }
+}
+
+function colorTable(pathArray, table){
+    for (var i = 0; i < table.rows.length; i++) {
+        for (var j = 0; j < table.rows[i].cells.length; j++){
+            if(pathArray[i][j] == 0){
+                table.rows[i].cells[j].style.backgroundColor = "white";
+                table.rows[i].cells[j].onclick = null;
+            }
+            else if (pathArray[i][j] == 1){
+                table.rows[i].cells[j].style.backgroundColor = "blue";
+                table.rows[i].cells[j].onclick = null;
+            }
+            else if (pathArray[i][j] == 2){
+                table.rows[i].cells[j].style.backgroundColor = "black";
+                table.rows[i].cells[j].onclick = setPathOnClick;
+            }
+        }
+    }
+}
+
+function setPathOnClick(){
+    var table = document.getElementById("tableID");
+    let x = this.cellIndex;
+    let z = 9 - parseInt(this.parentElement.id);
+    clearPath(pathArray);
+    colorRow(pathArray, x);
+    colorColumn(pathArray, z);
+    drawPath(pathArray, [z,x]);
+    colorTable(pathArray, table);
+    if(pathArray[9][9] == 1){
+        clearPath(pathArray);
+        allowTowersAndEnemies = true;
+        colorTable(pathArray, table);
+    }
+
+
+    enemyPath.push([x*2-9,-2,z*2-9]);
 }
 
 
@@ -191,8 +297,10 @@ function animate() {
             }
         }
     }
-
-    placeTower()
+    if(allowTowersAndEnemies){
+        placeTower();
+    }
+    
 }
 
 
@@ -224,7 +332,7 @@ function setPnTowers(){
 }
 
 function spawnEnemyAtSpawnPoint(spawnPoint) {
-    enemyArray.push(new Enemy([...spawnPoint], [...vertexDataEnemy], [...uvDataEnemy], [...normalDataEnemy], 0));
+    enemyArray.push(new Enemy([...spawnPoint], [...vertexDataEnemy], [...uvDataEnemy], [...normalDataEnemy], 0, [...enemyPath]));
 
 }
 
@@ -715,5 +823,6 @@ gl.texParameterf(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
 
 setPnTowers();
 animate();
+setPath(pathArray);
 
 
