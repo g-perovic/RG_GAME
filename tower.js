@@ -1,5 +1,26 @@
+import { vec3, mat4 } from './gl-matrix-module.js';
+
 export class Tower {
-    constructor(spawnCoordinates, vertexData, uvData, normalData, texId) {
+    constructor(spawnCoordinates, scene, texId) {
+        spawnCoordinates[0] = spawnCoordinates[0] * 2 - 9;
+        spawnCoordinates[2] = spawnCoordinates[2] * 2 - 9;
+
+        this.position = spawnCoordinates;
+        this.scene = scene
+        this.texId = texId;
+        this.translateMatrix = mat4.create();
+        this.scale = 0.1;
+        this.scaleMatrix = mat4.create();
+        mat4.scale(this.scaleMatrix, this.scaleMatrix, vec3.fromValues(this.scale, this.scale, this.scale));
+        this.rotateMatrix = mat4.create();
+        this.range = 5;
+        this.gunCoords = vec3.fromValues(0, 1.5, 0);
+        this.damage = 1;
+        mat4.translate(this.translateMatrix, this.translateMatrix, this.position);
+
+        mat4.mul(this.translateMatrix, this.translateMatrix, this.scaleMatrix);
+    }
+    /* constructor(spawnCoordinates, vertexData, uvData, normalData, texId) {
         spawnCoordinates[0] = spawnCoordinates[0] * 2 - 9;
         spawnCoordinates[2] = spawnCoordinates[2] * 2 - 9;
 
@@ -8,15 +29,16 @@ export class Tower {
         this.uvData = uvData;
         this.normalData = normalData;
         this.texId = texId;
-        this.translateMatrix = glMatrix.mat4.create();
+        this.translateMatrix =  mat4.create();
         this.range = 5;
-        this.gunCoords = glMatrix.vec3.fromValues(0,1.5,0);
+        this.gunCoords =  vec3.fromValues(0,1.5,0);
         this.damage = 1;
-        glMatrix.mat4.translate(this.translateMatrix, this.translateMatrix, this.position);
+         mat4.translate(this.translateMatrix, this.translateMatrix, this.position);
     }
+ */
 
     distanceFromEnemy(enemy) {
-        return glMatrix.vec3.distance(this.position, enemy.currentPosition());
+        return vec3.distance(this.position, enemy.currentPosition());
     }
 
     nearestEnemy(enemyArray) {
@@ -38,29 +60,28 @@ export class Tower {
 
 
     turnToEnemy(enemy) {
-        
-            let et = glMatrix.vec3.sub(glMatrix.vec3.create(), enemy.currentPosition(), this.position);
-            let c = glMatrix.vec3.angle(et, glMatrix.vec3.fromValues(1, 0, 0));
 
-            if (et[2] > 0) {
-                c = -c + Math.PI / 2;
-            } else {
-                c += Math.PI / 2;
-            }
+        let et = vec3.sub(vec3.create(), enemy.currentPosition(), this.position);
+        let c = vec3.angle(et, vec3.fromValues(1, 0, 0));
 
-            return glMatrix.mat4.rotateY(glMatrix.mat4.create(), glMatrix.mat4.create(), c);
-        
+        if (et[2] > 0) {
+            c = -c + Math.PI / 2;
+        } else {
+            c += Math.PI / 2;
+        }
 
-        return glMatrix.mat4.create();
+        return mat4.rotateY(mat4.create(), mat4.create(), c);
+
+
 
     }
 
-    isEnemyInRange(enemy){
+    isEnemyInRange(enemy) {
         return this.distanceFromEnemy(enemy) <= this.range;
     }
 
-    dealDamage(enemy){
-        enemy.health-=this.damage;
+    dealDamage(enemy) {
+        enemy.health -= this.damage;
     }
 
 }
