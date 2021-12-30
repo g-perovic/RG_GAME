@@ -1,8 +1,9 @@
+
 import { vec3, mat4 } from './gl-matrix-module.js';
 export class Enemy {
-    constructor(spawnCoordinates, scene, texId) {
+    constructor(spawnCoordinates, scene, texId, enemyPath) {
         this.position = spawnCoordinates;
-        this.movePath = [[-9, -2, -9], [1, -2, -4], [-5, -2, 0], [9, -2, 9]];
+        this.movePath = enemyPath;
         this.scene = scene;
         this.texId = texId;
 
