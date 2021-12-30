@@ -1,7 +1,30 @@
-export class Enemy{
-    constructor(spawnCoordinates, vertexData, uvData, normalData, texId, enemyPath){
+
+
+import { vec3, mat4 } from './gl-matrix-module.js';
+export class Enemy {
+    constructor(spawnCoordinates, scene, texId, enemyPath) {
         this.position = spawnCoordinates;
         this.movePath = enemyPath;
+        this.scene = scene;
+        this.texId = texId;
+
+        this.translateMatrix = mat4.create();
+        mat4.translate(this.translateMatrix, this.translateMatrix, this.position);
+        this.scale = 0.5;
+        this.scaleMatrix = mat4.create();
+        mat4.scale(this.scaleMatrix, this.scaleMatrix, vec3.fromValues(this.scale, this.scale, this.scale));
+
+        //mat4.mul(this.translateMatrix, this.translateMatrix, this.scaleMatrix);
+
+        this.health = 60 * 2;
+        this.speed = 1 / 50;
+        this.moveVector = this.calculateMoveVector();
+        this.isAtEndPosition = false;
+    }
+
+    /* constructor(spawnCoordinates, vertexData, uvData, normalData, texId) {
+        this.position = spawnCoordinates;
+        this.movePath = [[0, -2, -6], [1, -2, -4], [-5, -2, 0], [5, -2, 6.5]];
         this.vertexData = vertexData;
         this.uvData = uvData;
         this.normalData = normalData;
@@ -12,7 +35,7 @@ export class Enemy{
         this.speed = 1/50;
         this.moveVector = this.calculateMoveVector();
         this.isAtEndPosition = false;
-    }
+    }*/
 
     moveForward(){
         if (this.isAtPosition()){
