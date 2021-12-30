@@ -153,12 +153,13 @@ function randomColor() {
 
 
 waveSpawn.addEventListener("click", function () {
-    for (var i = 0; i < 12; i++) {
-        setTimeout(function () {
-            spawnEnemyAtSpawnPoint([-9, -2, -9])
-        }, 750 * i);
+    if(allowTowersAndEnemies){
+        for (var i = 0; i < 12; i++) {
+            setTimeout(function () {
+                spawnEnemyAtSpawnPoint([-9, -2, -9])
+            }, 750 * i);
+        }
     }
-
 });
 
 function waveInProgress() {
