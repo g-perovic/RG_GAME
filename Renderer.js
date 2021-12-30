@@ -7,7 +7,7 @@ import { shaders } from './shaders.js';
 
 import { Enemy } from "./enemy.js";
 import { Tower } from "./tower.js";
-
+import { Bullet } from './bullet.js';
 
 // This class prepares all assets for use with WebGL
 // and takes care of rendering.
@@ -226,6 +226,25 @@ export class Renderer {
 
         //const mvpMatrix = this.getViewProjectionMatrix(camera);
         for (const node of tower.scene.nodes) {
+            this.renderNode(node, mMatrix, vMatrix, pMatrix);
+        }
+    }
+
+    renderBullet(bullet, vMatrix, pMatrix) {
+        const gl = this.gl;
+
+        //gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+
+        const program = this.programs.simple;
+        gl.useProgram(program.program);
+        gl.uniform1i(program.uniforms.uTexture, 0);
+
+        let mMatrix = mat4.create();
+        mat4.mul(mMatrix, bullet.scaleMatrix, bullet.rotateMatrix);
+        mat4.mul(mMatrix, bullet.translateMatrix, mMatrix);
+
+        //const mvpMatrix = this.getViewProjectionMatrix(camera);
+        for (const node of bullet.scene.nodes) {
             this.renderNode(node, mMatrix, vMatrix, pMatrix);
         }
     }

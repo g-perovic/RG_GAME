@@ -5,6 +5,7 @@ import { Renderer } from './Renderer.js';
 
 import { Enemy } from "./enemy.js";
 import { Tower } from "./tower.js";
+import { Bullet } from './bullet.js';
 
 const canvas = document.querySelector('canvas');
 const gl = canvas.getContext('webgl2');
@@ -13,7 +14,11 @@ const gl = canvas.getContext('webgl2');
 const waveSpawn = document.getElementById("spawnWave");
 let towerArray = new Array();
 let enemyArray = new Array();
+let bulletArray = new Array();
 let endPosition = [5, -2, 6.5]; //provizoriš
+
+let fCount = 0;
+
 
 let nTowers = 100 // št towerju ki jih lhku spawnas
 
@@ -172,7 +177,7 @@ function animate() {
     requestAnimationFrame(animate);
     // mat4.translate(viewMatrix, viewMatrix, [0, 0.1, 2]);
     // mat4.invert(viewMatrix, viewMatrix);
-
+    fCount++;
 
 
 
@@ -187,7 +192,9 @@ function animate() {
                     // if(enemyArray[nearestI] != null)
                     if (towerArray[i][j].isEnemyInRange(enemyArray[nearestI])) {
                         towerArray[i][j].rotateMatrix = towerArray[i][j].turnToEnemy(enemyArray[nearestI]);
-                        towerArray[i][j].dealDamage(enemyArray[nearestI]);
+                        if (fCount % towerArray[i][j].fireRate == 0)
+                            spawnBulletAtTower(towerArray[i][j], enemyArray[nearestI]);
+                        //towerArray[i][j].dealDamage(enemyArray[nearestI]);
                     }
 
                 }
@@ -208,6 +215,19 @@ function animate() {
                 }
                 else
                     enemyArray[i] = null;
+            }
+        }
+    }
+
+    for (let i = 0; i < bulletArray.length; i++) {
+        if (bulletArray[i] != null) {
+            if (bulletArray[i].isAtEnemy()) {
+                bulletArray[i].dealDamage();
+                bulletArray[i] = null;
+            } else {
+                bulletArray[i].turnToEnemy();
+                bulletArray[i].moveForward();
+                renderer.renderBullet(bulletArray[i], viewMatrix, projectionMatrix);
             }
         }
     }
@@ -254,6 +274,12 @@ function spawnEnemyAtSpawnPoint(spawnPoint) {
 function spawnTowerAtCoordinates(coordinates) {
     let a = new Tower([...coordinates], towerScene, 1); //tu bo use za towerje
     towerArray[coordinates[2]][coordinates[0]] = a;
+}
+
+function spawnBulletAtTower(tower, enemy) {
+    let a = new Bullet(tower.getBulletSpawnPosition(enemy), bulletScene, enemy, tower.damage);
+    //let a = new Tower([...coordinates], towerScene, 1); //tu bo use za towerje
+    bulletArray.push(a);
 }
 
 
@@ -710,9 +736,9 @@ gl.uniformMatrix4fv(uniformLocations.vmatrix, false, viewMatrix);
 gl.uniformMatrix4fv(uniformLocations.pmatrix, false, projectionMatrix);
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//LOAD TEXTURES
+//LOAD MODELS
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
-const enemyTex = loadTexture(`textures/default_brick.png`);
+/* const enemyTex = loadTexture(`textures/default_brick.png`);
 
 gl.activeTexture(gl.TEXTURE0);
 gl.bindTexture(gl.TEXTURE_2D, enemyTex);
@@ -731,10 +757,13 @@ const laser = loadTexture(`textures/default_diamond_block.png`);
 gl.activeTexture(gl.TEXTURE0 + 2);
 gl.bindTexture(gl.TEXTURE_2D, laser);
 
-gl.texParameterf(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+gl.texParameterf(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST); */
 
 
 let loader = new GLTFLoader();
+
+const renderer = new Renderer(gl);
+
 await loader.load('models/covid-19/covid.gltf');
 
 let virusScene = await loader.loadScene(loader.defaultScene);
@@ -748,13 +777,12 @@ if (!virusCamera.camera) {
     throw new Error('Camera node does not contain a camera reference');
 }
 
-const renderer = new Renderer(gl);
 
 renderer.prepareScene(virusScene);
 
 
 
-await loader.load('models/cannon2/cannon.gltf');
+await loader.load('models/topcina/topcina.gltf');
 
 let towerScene = await loader.loadScene(loader.defaultScene);
 let towerCamera = await loader.loadNode('Camera');
@@ -769,6 +797,27 @@ if (!towerCamera.camera) {
 
 
 renderer.prepareScene(towerScene);
+
+await loader.load('models/inekcija/inekcija.gltf');
+
+let bulletScene = await loader.loadScene(loader.defaultScene);
+let bulletCamera = await loader.loadNode('Camera');
+
+if (!bulletScene || !bulletCamera) {
+    throw new Error('Scene or Camera not present in glTF');
+}
+
+if (!bulletCamera.camera) {
+    throw new Error('Camera node does not contain a camera reference');
+}
+
+
+renderer.prepareScene(bulletScene);
+
+
+
+/* enemyArray[0] = new Enemy([-9, -2, -9], virusScene, 0);
+bulletArray[0] = new Bullet([9, -2, -9], bulletScene, enemyArray[0], 1); */
 
 
 
