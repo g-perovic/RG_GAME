@@ -1,3 +1,8 @@
+import { vec3, mat4 } from './gl-matrix-module.js';
+
+import { GLTFLoader } from './GLTFLoader.js';
+import { Renderer } from './Renderer.js';
+
 import { Enemy } from "./enemy.js";
 import { Tower } from "./tower.js";
 
@@ -14,7 +19,7 @@ let previousClick = [0,0];
 let allowTowersAndEnemies = false;
 let enemyPath = [];
 
-let nTowers = 5 // št towerju ki jih lhku spawnas
+let nTowers = 100 // št towerju ki jih lhku spawnas
 
 
 for (let i = 0; i < 10; i++) {
@@ -33,6 +38,8 @@ for (let i = 0; i < 10; i++) {
 if (!gl) {
     throw new Error('WebGL not supported');
 }
+
+
 
 function createShaders() {
     const vertexShader = gl.createShader(gl.VERTEX_SHADER);
@@ -270,8 +277,8 @@ function setPathOnClick(){
 
 function animate() {
     requestAnimationFrame(animate);
-    //glMatrix.mat4.translate(viewMatrix, viewMatrix, [0, 0.1, 2]);
-    //glMatrix.mat4.invert(viewMatrix, viewMatrix);
+    // mat4.translate(viewMatrix, viewMatrix, [0, 0.1, 2]);
+    // mat4.invert(viewMatrix, viewMatrix);
 
 
 
@@ -281,7 +288,18 @@ function animate() {
     for (let i = 0; i < towerArray.length; i++) {
         for (let j = 0; j < towerArray[i].length; j++) {
             if (towerArray[i][j] != null) {
-                drawTower(towerArray[i][j]);
+                let nearestI;
+                if (enemyArray.length > 0 && waveInProgress()) {
+                    nearestI = towerArray[i][j].nearestEnemy(enemyArray)
+                    // if(enemyArray[nearestI] != null)
+                    if (towerArray[i][j].isEnemyInRange(enemyArray[nearestI])) {
+                        towerArray[i][j].rotateMatrix = towerArray[i][j].turnToEnemy(enemyArray[nearestI]);
+                        towerArray[i][j].dealDamage(enemyArray[nearestI]);
+                    }
+
+                }
+
+                renderer.renderTower(towerArray[i][j], viewMatrix, projectionMatrix);
             }
         }
     }
@@ -291,8 +309,10 @@ function animate() {
             if (enemyArray[i].isAtEndPosition) {
                 enemyArray[i] = null;
             } else {
-                if (enemyArray[i].isAlive())
-                    drawEnemy(enemyArray[i]);
+                if (enemyArray[i].isAlive()) {
+                    renderer.renderVirus(enemyArray[i], viewMatrix, projectionMatrix);
+                    enemyArray[i].moveForward();
+                }
                 else
                     enemyArray[i] = null;
             }
@@ -311,34 +331,36 @@ PREVERJANJE HTML TABELE
  */
 function placeTower() {
     var table = document.getElementById("tableID");
-    
+
     if (table != null) {
         for (var i = 0; i < table.rows.length; i++) {
             for (var j = 0; j < table.rows[i].cells.length; j++)
                 table.rows[i].cells[j].onclick = function () {
-                    if(nTowers > 0){
-                        spawnTowerAtCoordinates([this.cellIndex, -2, 9 - parseInt(this.parentElement.id)]);
-                        this.style.backgroundColor = "red";
-                        nTowers--;
-                        setPnTowers();
+                    if (nTowers > 0) {
+                        if (!towerArray[9 - parseInt(this.parentElement.id)][this.cellIndex]) {
+
+                            spawnTowerAtCoordinates([this.cellIndex, -2, 9 - parseInt(this.parentElement.id)]);
+                            this.style.backgroundColor = "red";
+                            nTowers--;
+                            setPnTowers();
+                        }
                     }
                 };
         }
     }
 }
 
-function setPnTowers(){
+function setPnTowers() {
     var numTowers = document.getElementById("nTowers");
     numTowers.textContent = "Towers: " + nTowers;
 }
 
 function spawnEnemyAtSpawnPoint(spawnPoint) {
-    enemyArray.push(new Enemy([...spawnPoint], [...vertexDataEnemy], [...uvDataEnemy], [...normalDataEnemy], 0, [...enemyPath]));
-
+    enemyArray.push(new Enemy([...spawnPoint], virusScene, 0, [...enemyPath]));
 }
 
 function spawnTowerAtCoordinates(coordinates) {
-    let a = new Tower([...coordinates], [...vertexDataBase], [...uvDataBase], [...normalDataBase], 1); //tu bo use za towerje
+    let a = new Tower([...coordinates], towerScene, 1); //tu bo use za towerje
     towerArray[coordinates[2]][coordinates[0]] = a;
 }
 
@@ -376,7 +398,7 @@ function drawEnemy(enemy) {
 
     gl.drawArrays(gl.TRIANGLES, 0, enemy.vertexData.length / 3);
 
-    enemy.moveForward();
+
 }
 
 function drawTower(tower) {
@@ -404,9 +426,9 @@ function drawTower(tower) {
     gl.bindBuffer(gl.ARRAY_BUFFER, normalBuffer);
     gl.vertexAttribPointer(normalLocation, 3, gl.FLOAT, false, 0, 0);
 
-    let moveMatrix = glMatrix.mat4.create();
+    let moveMatrix = mat4.create();
 
-    let rotateMatrix = glMatrix.mat4.create();
+    let rotateMatrix = mat4.create();
     let nearestI;
     if (enemyArray.length > 0 && waveInProgress()) {
         nearestI = tower.nearestEnemy(enemyArray)
@@ -418,8 +440,8 @@ function drawTower(tower) {
 
     }
 
-    glMatrix.mat4.mul(moveMatrix, tower.translateMatrix, rotateMatrix);
-    //glMatrix.mat4.translate(moveMatrix, moveMatrix, tower.translateMatrix);
+    mat4.mul(moveMatrix, tower.translateMatrix, rotateMatrix);
+    // mat4.translate(moveMatrix, moveMatrix, tower.translateMatrix);
 
 
     gl.uniformMatrix4fv(uniformLocations.tmatrix, false, moveMatrix);
@@ -442,23 +464,23 @@ function drawTower(tower) {
 
 
 function drawLine(v1, v2, tower) {
-    let v3 = glMatrix.vec3.create();
-    glMatrix.vec3.add(v3, v1, tower.position);
+    let v3 = vec3.create();
+    vec3.add(v3, v1, tower.position);
 
     let v = [
-        ...glMatrix.vec3.add(glMatrix.vec3.create(), v3, glMatrix.vec3.fromValues(0, 0.1, 0)),
-        ...glMatrix.vec3.add(glMatrix.vec3.create(), v3, glMatrix.vec3.fromValues(0, -0.1, 0)),
-        ...glMatrix.vec3.add(glMatrix.vec3.create(), v2, glMatrix.vec3.fromValues(0, 0.1, 0)),
-        ...glMatrix.vec3.add(glMatrix.vec3.create(), v2, glMatrix.vec3.fromValues(0, 0.1, 0)),
-        ...glMatrix.vec3.add(glMatrix.vec3.create(), v3, glMatrix.vec3.fromValues(0, -0.1, 0)),
-        ...glMatrix.vec3.add(glMatrix.vec3.create(), v2, glMatrix.vec3.fromValues(0, -0.1, 0)),
+        ...vec3.add(vec3.create(), v3, vec3.fromValues(0, 0.1, 0)),
+        ...vec3.add(vec3.create(), v3, vec3.fromValues(0, -0.1, 0)),
+        ...vec3.add(vec3.create(), v2, vec3.fromValues(0, 0.1, 0)),
+        ...vec3.add(vec3.create(), v2, vec3.fromValues(0, 0.1, 0)),
+        ...vec3.add(vec3.create(), v3, vec3.fromValues(0, -0.1, 0)),
+        ...vec3.add(vec3.create(), v2, vec3.fromValues(0, -0.1, 0)),
 
-        ...glMatrix.vec3.add(glMatrix.vec3.create(), v3, glMatrix.vec3.fromValues(0.1, 0, 0)),
-        ...glMatrix.vec3.add(glMatrix.vec3.create(), v3, glMatrix.vec3.fromValues(-0.1, 0, 0)),
-        ...glMatrix.vec3.add(glMatrix.vec3.create(), v2, glMatrix.vec3.fromValues(0.1, 0, 0)),
-        ...glMatrix.vec3.add(glMatrix.vec3.create(), v2, glMatrix.vec3.fromValues(0.1, 0, 0)),
-        ...glMatrix.vec3.add(glMatrix.vec3.create(), v3, glMatrix.vec3.fromValues(-0.1, 0, 0)),
-        ...glMatrix.vec3.add(glMatrix.vec3.create(), v2, glMatrix.vec3.fromValues(-0.1, 0, 0)),
+        ...vec3.add(vec3.create(), v3, vec3.fromValues(0.1, 0, 0)),
+        ...vec3.add(vec3.create(), v3, vec3.fromValues(-0.1, 0, 0)),
+        ...vec3.add(vec3.create(), v2, vec3.fromValues(0.1, 0, 0)),
+        ...vec3.add(vec3.create(), v2, vec3.fromValues(0.1, 0, 0)),
+        ...vec3.add(vec3.create(), v3, vec3.fromValues(-0.1, 0, 0)),
+        ...vec3.add(vec3.create(), v2, vec3.fromValues(-0.1, 0, 0)),
     ];
 
     let uv = [
@@ -509,7 +531,7 @@ function drawLine(v1, v2, tower) {
     gl.vertexAttribPointer(normalLocation, 3, gl.FLOAT, false, 0, 0);
 
 
-    gl.uniformMatrix4fv(uniformLocations.tmatrix, false, glMatrix.mat4.create());
+    gl.uniformMatrix4fv(uniformLocations.tmatrix, false, mat4.create());
     gl.uniform1i(uniformLocations.texId, 2);
 
     gl.drawArrays(gl.TRIANGLES, 0, v.length / 3);
@@ -776,21 +798,21 @@ const uniformLocations = {
     texId: gl.getUniformLocation(program, `texID`)
 };
 
-const modelMatrix = glMatrix.mat4.create();
-const viewMatrix = glMatrix.mat4.create();
-const projectionMatrix = glMatrix.mat4.create();
-glMatrix.mat4.perspective(projectionMatrix,
+const modelMatrix = mat4.create();
+const viewMatrix = mat4.create();
+const projectionMatrix = mat4.create();
+mat4.perspective(projectionMatrix,
     80 * Math.PI / 180, // vertical field-of-view (angle, radians)
     canvas.width / canvas.height, // aspect W/H
     1e-4, // near cull distance
     1e4 // far cull distance
 );
 
-glMatrix.mat4.rotateX(viewMatrix, viewMatrix, -0.4);
-glMatrix.mat4.translate(viewMatrix, viewMatrix, glMatrix.vec3.fromValues(0, 0, 15));
+mat4.rotateX(viewMatrix, viewMatrix, -0.4);
+mat4.translate(viewMatrix, viewMatrix, vec3.fromValues(0, 0, 15));
 
 
-glMatrix.mat4.invert(viewMatrix, viewMatrix);
+mat4.invert(viewMatrix, viewMatrix);
 
 gl.uniformMatrix4fv(uniformLocations.vmatrix, false, viewMatrix);
 gl.uniformMatrix4fv(uniformLocations.pmatrix, false, projectionMatrix);
@@ -818,6 +840,43 @@ gl.activeTexture(gl.TEXTURE0 + 2);
 gl.bindTexture(gl.TEXTURE_2D, laser);
 
 gl.texParameterf(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+
+
+let loader = new GLTFLoader();
+await loader.load('models/covid-19/covid.gltf');
+
+let virusScene = await loader.loadScene(loader.defaultScene);
+let virusCamera = await loader.loadNode('Camera');
+
+if (!virusScene || !virusCamera) {
+    throw new Error('Scene or Camera not present in glTF');
+}
+
+if (!virusCamera.camera) {
+    throw new Error('Camera node does not contain a camera reference');
+}
+
+const renderer = new Renderer(gl);
+
+renderer.prepareScene(virusScene);
+
+
+
+await loader.load('models/cannon2/cannon.gltf');
+
+let towerScene = await loader.loadScene(loader.defaultScene);
+let towerCamera = await loader.loadNode('Camera');
+
+if (!towerScene || !towerCamera) {
+    throw new Error('Scene or Camera not present in glTF');
+}
+
+if (!towerCamera.camera) {
+    throw new Error('Camera node does not contain a camera reference');
+}
+
+
+renderer.prepareScene(towerScene);
 
 
 
