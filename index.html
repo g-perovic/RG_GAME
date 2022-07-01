@@ -1,184 +1,293 @@
-
-   
 <!DOCTYPE html>
-<html>
-    <head>
-        <meta charset="utf-8">
-        <title>Vaja</title>
-        <link rel="stylesheet" href="" type="text/css" media="screen">
-        <script src="gl-matrix-min.js"></script>
-        <script type="module" >
-            import { Enemy } from "./enemy.js";
-        </script>
-        <script type="module" src="main.js" defer></script>
-        
-    
-        <style>
-            canvas{
-                border: 1px solid black;
-                width: 100%;
-                height: 100%;
-            }
-            #tableID{
-                position: absolute;
-                top: 20px;
-                right: 20px;
-            }
-            td{
-                height: 18px;
-                width: 18px;
-                border-color: darkolivegreen;
-                border-style: solid;
-                border-width: thick;
-            }
-            #spawnWave{
-                position: absolute;
-                top: 400px;
-                right: 20px;  
+<html onload="playAudio()">
 
-            }
-            #nTowers{
-                position: absolute;
-                top: 350px;
-                right: 20px;  
-
-            }
-        </style>
-
-    </head>
-    <body>
-        <canvas></canvas>
-        <script>
-            const c = document.getElementsByTagName('canvas')[0];
-            c.width = window.innerWidth;
-            c.height = window.innerHeight;
-        </script>
-        <table align="center" id="tableID"  style="cursor: pointer;">
-            <tr id = "9">
-                <td></td>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td></td>
-            </tr>
-            <tr id = "8">
-                <td></td>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td></td>
-            </tr>
-            <tr id = "7">
-                <td></td>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td></td>
-            </tr>
-            <tr id = "6">
-                <td></td>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td></td>
-            </tr>
-            <tr id = "5">
-                <td></td>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td></td>
-            </tr>
-            <tr id = "4">
-                <td></td>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td></td>
-            </tr>
-            <tr id = "3">
-                <td></td>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td></td>
-            </tr>
-            <tr id = "2">
-                <td></td>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td></td>
-            </tr>
-            <tr id = "1">
-                <td></td>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td></td>
-            </tr>
-            <tr id = "0">
-                <td></td>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td></td>
-            </tr>
-        </table>
+<head>
+    <meta charset="utf-8">
+    <title>Vaja</title>
+    <link rel="stylesheet" href="" type="text/css" media="screen">
+    <script src="gl-matrix-min.js"></script>
+    <script type="module">
+        import { Enemy } from "./enemy.js";
+    </script>
+    <script type="module" src="main.js" defer></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@500&display=swap" rel="stylesheet">
 
 
-        <p id="nTowers"></p>
+    <style>
+        canvas {
+            border: 1px solid black;
+            width: 100%;
+            height: 100%;
+        }
 
-        <button id="spawnWave">Spawn wave</button>
-    </body>
+        #tableID {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+        }
+
+
+        #spawnWave {
+            background: #FF4742;
+            border: 1px solid #FF4742;
+            border-radius: 6px;
+            box-shadow: rgba(0, 0, 0, 0.1) 1px 2px 4px;
+            box-sizing: border-box;
+            color: #FFFFFF;
+            cursor: pointer;
+            display: inline-block;
+            font-family: nunito, roboto, proxima-nova, "proxima nova", sans-serif;
+            font-size: 16px;
+            font-weight: 800;
+            line-height: 16px;
+            min-height: 40px;
+            outline: 0;
+            padding: 12px 14px;
+            text-align: center;
+            text-rendering: geometricprecision;
+            text-transform: none;
+            user-select: none;
+            -webkit-user-select: none;
+            touch-action: manipulation;
+            vertical-align: middle;
+            position: absolute;
+            top: 780px;
+            right: 20px;
+
+        }
+
+        #spawnWave:hover,
+        #spawnWave:active {
+            background-color: initial;
+            background-position: 0 0;
+            color: #FF4742;
+        }
+
+        #spawnWave:active {
+            opacity: .5;
+        }
+
+        #nHealth {
+            position: absolute;
+            top: 500px;
+            right: 20px;
+        }
+
+        #nTowers {
+            position: absolute;
+            top: 400px;
+            right: 20px;
+
+        }
+
+        #nClicks {
+            position: absolute;
+            top: 450px;
+            right: 20px;
+
+        }
+        #roundCounter{
+            position: absolute;
+            top: 10px;
+            left: 30px;
+        }
+
+        #gridTD {
+            display: inline-block;
+            /* this has been added */
+            border-radius: 5px;
+            background-color: #369;
+            color: white;
+            margin: 3px;
+            height: 18px;
+            width: 18px;
+            border-color: rgb(2, 70, 32);
+            border-style: solid;
+            border-width: thick;
+        }
+
+        p {
+            font-family: 'Roboto', sans-serif;
+            font-size: 20px;
+            font-style: bold;
+        }
+
+        #towerSelectGrid{
+            position: absolute;
+            top: 600px;
+            right: 20px;
+            border: 5px solid black;
+            border-radius: 5px;
+        }
+        table#towerSelectGrid td{
+            height: 50px;
+            width: 50px;
+            border: 3px solid black;
+            padding: 5px;
+            font-family: 'Roboto', sans-serif;
+            font-size: 20px;
+            font-style: bold;
+            border-radius: 5px;
+        }
+    </style>
+
+</head>
+
+<body>
+    <canvas></canvas>
+    <script>
+        const c = document.getElementsByTagName('canvas')[0];
+        c.width = window.innerWidth;
+        c.height = window.innerHeight;
+    </script>
+    <table align="center" id="tableID" style="cursor: pointer;">
+        <tr id="9">
+            <td id = "gridTD"></td>
+            <td id = "gridTD"></td>
+            <td id = "gridTD"></td>
+            <td id = "gridTD"></td>
+            <td id = "gridTD"></td>
+            <td id = "gridTD"></td>
+            <td id = "gridTD"></td>
+            <td id = "gridTD"></td>
+            <td id = "gridTD"></td>
+            <td id = "gridTD"></td>
+        </tr>
+        <tr id="8">
+            <td id = "gridTD"></td>
+            <td id = "gridTD"></td>
+            <td id = "gridTD"></td>
+            <td id = "gridTD"></td>
+            <td id = "gridTD"></td>
+            <td id = "gridTD"></td>
+            <td id = "gridTD"></td>
+            <td id = "gridTD"></td>
+            <td id = "gridTD"></td>
+            <td id = "gridTD"></td>
+        </tr>
+        <tr id="7">
+            <td id = "gridTD"></td>
+            <td id = "gridTD"></td>
+            <td id = "gridTD"></td>
+            <td id = "gridTD"></td>
+            <td id = "gridTD"></td>
+            <td id = "gridTD"></td>
+            <td id = "gridTD"></td>
+            <td id = "gridTD"></td>
+            <td id = "gridTD"></td>
+            <td id = "gridTD"></td>
+        </tr>
+        <tr id="6">
+            <td id = "gridTD"></td>
+            <td id = "gridTD"></td>
+            <td id = "gridTD"></td>
+            <td id = "gridTD"></td>
+            <td id = "gridTD"></td>
+            <td id = "gridTD"></td>
+            <td id = "gridTD"></td>
+            <td id = "gridTD"></td>
+            <td id = "gridTD"></td>
+            <td id = "gridTD"></td>
+        </tr>
+        <tr id="5">
+            <td id = "gridTD"></td>
+            <td id = "gridTD"></td>
+            <td id = "gridTD"></td>
+            <td id = "gridTD"></td>
+            <td id = "gridTD"></td>
+            <td id = "gridTD"></td>
+            <td id = "gridTD"></td>
+            <td id = "gridTD"></td>
+            <td id = "gridTD"></td>
+            <td id = "gridTD"></td>
+        </tr>
+        <tr id="4">
+            <td id = "gridTD"></td>
+            <td id = "gridTD"></td>
+            <td id = "gridTD"></td>
+            <td id = "gridTD"></td>
+            <td id = "gridTD"></td>
+            <td id = "gridTD"></td>
+            <td id = "gridTD"></td>
+            <td id = "gridTD"></td>
+            <td id = "gridTD"></td>
+            <td id = "gridTD"></td>
+        </tr>
+        <tr id="3">
+            <td id = "gridTD"></td>
+            <td id = "gridTD"></td>
+            <td id = "gridTD"></td>
+            <td id = "gridTD"></td>
+            <td id = "gridTD"></td>
+            <td id = "gridTD"></td>
+            <td id = "gridTD"></td>
+            <td id = "gridTD"></td>
+            <td id = "gridTD"></td>
+            <td id = "gridTD"></td>
+        </tr>
+        <tr id="2">
+            <td id = "gridTD"></td>
+            <td id = "gridTD"></td>
+            <td id = "gridTD"></td>
+            <td id = "gridTD"></td>
+            <td id = "gridTD"></td>
+            <td id = "gridTD"></td>
+            <td id = "gridTD"></td>
+            <td id = "gridTD"></td>
+            <td id = "gridTD"></td>
+            <td id = "gridTD"></td>
+        </tr>
+        <tr id="1">
+            <td id = "gridTD"></td>
+            <td id = "gridTD"></td>
+            <td id = "gridTD"></td>
+            <td id = "gridTD"></td>
+            <td id = "gridTD"></td>
+            <td id = "gridTD"></td>
+            <td id = "gridTD"></td>
+            <td id = "gridTD"></td>
+            <td id = "gridTD"></td>
+            <td id = "gridTD"></td>
+        </tr>
+        <tr id="0">
+            <td id = "gridTD"></td>
+            <td id = "gridTD"></td>
+            <td id = "gridTD"></td>
+            <td id = "gridTD"></td>
+            <td id = "gridTD"></td>
+            <td id = "gridTD"></td>
+            <td id = "gridTD"></td>
+            <td id = "gridTD"></td>
+            <td id = "gridTD"></td>
+            <td  id = "gridTD" style="background-color: red;"></td>
+        </tr>
+    </table>
+
+
+    <p id="nTowers"></p>
+    <p id="nClicks"></p>
+    <p id="nHealth"></p>
+
+    <table id="towerSelectGrid">
+        <tr><td>125$</td><td>200$</td><td>400$</td></tr>
+        <tr><td id="tower1" style="background-color: red;"><img src=".\textures\tower1.png" height=50 width=50></img></td><td id="tower2"><img src=".\textures\tower2.png" height=50 width=50></img></td><td id="tower3"><img src=".\textures\tower3.png" height=50 width=50></img></td></tr>
+    </table>
+
+    <button id="spawnWave">Spawn wave</button>
+    <p id="roundCounter"></p>
+
+    <audio id="right">
+        <source src="audio1.mp3">
+    </audio>
+    <audio id="amd">
+        <source src="hitmarker.mp3">
+    </audio>
+    <audio id="niprebil">
+        <source src="niprebil.mp3">
+    </audio>
+
+</body>
+
 </html>

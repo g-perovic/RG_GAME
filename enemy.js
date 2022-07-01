@@ -2,8 +2,13 @@
 
 import { vec3, mat4 } from './gl-matrix-module.js';
 export class Enemy {
+<<<<<<< Updated upstream
     constructor(spawnCoordinates, scene, texId, enemyPath) {
         this.position = spawnCoordinates;
+=======
+    constructor(scene, texId, enemyPath, healthMul, speedMul) {
+        this.position = [-9,-2,-9];
+>>>>>>> Stashed changes
         this.movePath = enemyPath;
         this.scene = scene;
         this.texId = texId;
@@ -16,8 +21,8 @@ export class Enemy {
 
         //mat4.mul(this.translateMatrix, this.translateMatrix, this.scaleMatrix);
 
-        this.health = 60 * 2;
-        this.speed = 1 / 50;
+        this.health = 1 * healthMul;
+        this.speed = 1/45 * speedMul * (Math.random()*(1-1.5) + 1);
         this.moveVector = this.calculateMoveVector();
         this.isAtEndPosition = false;
     }
@@ -29,6 +34,7 @@ export class Enemy {
         this.uvData = uvData;
         this.normalData = normalData;
         this.texId = texId;
+<<<<<<< Updated upstream
         this.translateMatrix = glMatrix.mat4.create();
         glMatrix.mat4.translate(this.translateMatrix, this.translateMatrix, this.position);
         this.health = 60 * 2; 
@@ -36,6 +42,16 @@ export class Enemy {
         this.moveVector = this.calculateMoveVector();
         this.isAtEndPosition = false;
     }*/
+=======
+        this.translateMatrix =  mat4.create();
+         mat4.translate(this.translateMatrix, this.translateMatrix, this.position);
+        this.health = 60 * 2;
+        this.speed = 1 / 50;
+        this.moveVector = this.calculateMoveVector();
+        this.isAtEndPosition = false;
+    } */
+
+>>>>>>> Stashed changes
 
     moveForward(){
         if (this.isAtPosition()){
@@ -61,10 +77,18 @@ export class Enemy {
         }
         return moveVector;
     }
+<<<<<<< Updated upstream
     isAtPosition(){
         return ((this.position[0] <= this.movePath[0][0]+0.01 && this.position[0] >= this.movePath[0][0]-0.01) &&
                 (this.position[1] <= this.movePath[0][1]+0.01 && this.position[1] >= this.movePath[0][1]-0.01) &&
                 (this.position[2] <= this.movePath[0][2]+0.01 && this.position[2] >= this.movePath[0][2]-0.01));
+=======
+    isAtPosition() {
+        let amd = 0.1;
+        return ((this.position[0] <= this.movePath[0][0] + amd && this.position[0] >= this.movePath[0][0] - amd) &&
+            (this.position[1] <= this.movePath[0][1] + amd && this.position[1] >= this.movePath[0][1] - amd) &&
+            (this.position[2] <= this.movePath[0][2] + amd && this.position[2] >= this.movePath[0][2] - amd));
+>>>>>>> Stashed changes
     }
 
     currentPosition(){

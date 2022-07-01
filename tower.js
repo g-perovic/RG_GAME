@@ -1,5 +1,31 @@
 export class Tower {
+<<<<<<< Updated upstream
     constructor(spawnCoordinates, vertexData, uvData, normalData, texId) {
+=======
+    constructor(spawnCoordinates, scene, texId, damage, speed, scale, range) {
+        spawnCoordinates[0] = spawnCoordinates[0] * 2 - 9;
+        spawnCoordinates[2] = spawnCoordinates[2] * 2 - 9;
+
+        this.position = spawnCoordinates;
+        this.scene = scene
+        this.texId = texId;
+        this.translateMatrix = mat4.create();
+        this.scale = scale;
+        this.scaleMatrix = mat4.create();
+        mat4.scale(this.scaleMatrix, this.scaleMatrix, vec3.fromValues(this.scale, this.scale, this.scale));
+        this.rotateMatrix = mat4.create();
+        mat4.rotateY(this.rotateMatrix, this.rotateMatrix, -Math.PI/2);
+        this.range = range;
+        this.gunCoords = vec3.fromValues(0, 0, 2);
+        this.damage = damage;
+        this.fireRate = speed;
+        mat4.translate(this.translateMatrix, this.translateMatrix, this.position);
+
+        mat4.mul(this.translateMatrix, this.translateMatrix, this.rotateMatrix);
+        mat4.mul(this.translateMatrix, this.translateMatrix, this.scaleMatrix);
+    }
+    /* constructor(spawnCoordinates, vertexData, uvData, normalData, texId) {
+>>>>>>> Stashed changes
         spawnCoordinates[0] = spawnCoordinates[0] * 2 - 9;
         spawnCoordinates[2] = spawnCoordinates[2] * 2 - 9;
 
